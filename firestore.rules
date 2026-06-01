@@ -1,38 +1,8 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-
-    function isAuth() { return request.auth != null; }
-    function isAdmin() {
-      return isAuth() &&
-        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-    }
-
-    match /users/{uid} {
-      allow read: if isAuth();
-      // authenticated user can create their OWN doc (covers setup + admin-created users via secondary app)
-      allow create: if isAuth() && request.auth.uid == uid;
-      allow update: if isAdmin() || (isAuth() && request.auth.uid == uid);
-      allow delete: if isAdmin();
-    }
-
-    match /refusals/{id} {
-      allow read: if isAuth();
-      allow create: if isAuth();
-      allow update: if isAuth() && (resource.data.doctorId == request.auth.uid || isAdmin());
-      allow delete: if isAuth() && (resource.data.doctorId == request.auth.uid || isAdmin());
-    }
-
-    match /refusalReasons/{id} {
-      allow read: if isAuth();
-      // allow create during setup (when no admin exists yet) or by admin
-      allow create, update, delete: if isAdmin() || !exists(/databases/$(database)/documents/users/$(request.auth.uid));
-    }
-
-    match /auditLogs/{id} {
-      allow read: if isAdmin();
-      allow create: if isAuth();
-      allow update, delete: if false;
+    match /{document=**} {
+      allow read, write: if request.auth != null;
     }
   }
 }
