@@ -3,7 +3,10 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
+import { signInWithFirebaseToken } from './firebase';
+
 const TOKEN_KEY = '112_auth_token';
+const FIREBASE_TOKEN_KEY = '112_fb_token';
 
 export const api = {
   getToken(): string | null {
@@ -16,6 +19,7 @@ export const api = {
 
   clearToken() {
     localStorage.removeItem(TOKEN_KEY);
+    localStorage.removeItem(FIREBASE_TOKEN_KEY);
   },
 
   async request(endpoint: string, options: RequestInit = {}) {
@@ -46,6 +50,10 @@ export const api = {
     });
     if (data.token) {
       this.setToken(data.token);
+    }
+    if (data.firebaseToken) {
+      localStorage.setItem(FIREBASE_TOKEN_KEY, data.firebaseToken);
+      await signInWithFirebaseToken(data.firebaseToken);
     }
     return data;
   },

@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { subscribeToUsers } from '../lib/firebase';
 import { User, UserRole, UserStatus } from '../types';
 import { Users, UserPlus, ShieldAlert, CheckCircle, XCircle, Trash2, Edit, KeyRound, Clock, RefreshCw } from 'lucide-react';
 
@@ -30,21 +31,15 @@ export function UserManagement() {
   const [resetUsername, setResetUsername] = useState('');
   const [newPassword, setNewPassword] = useState('');
 
-  const fetchUsers = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await api.getUsers();
-      setUsers(data);
-    } catch (err: any) {
-      setError(err?.message || 'მომხმარებლების ჩატვირთვა ვერ მოხერხდა');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchUsers = () => { /* live sync via onSnapshot */ };
 
   useEffect(() => {
-    fetchUsers();
+    setLoading(true);
+    const unsub = subscribeToUsers(data => {
+      setUsers(data as User[]);
+      setLoading(false);
+    });
+    return () => unsub();
   }, []);
 
   const handleOpenAdd = () => {
@@ -86,7 +81,6 @@ export function UserManagement() {
       try {
         await api.deleteUser(id);
         alert('მომხმარებელი წარმატებით წაიშალა');
-        fetchUsers();
       } catch (err: any) {
         alert(err?.message || 'წაშლა ვერ მოხერხდა');
       }
@@ -123,7 +117,6 @@ export function UserManagement() {
         await api.createUser(payload);
       }
       setShowModal(false);
-      fetchUsers();
     } catch (err: any) {
       setError(err?.message || 'შენახვისას დაფიქსირდა შეცდომა');
     }

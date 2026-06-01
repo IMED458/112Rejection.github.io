@@ -1,0 +1,10 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Allow authenticated Firebase users (signed in via custom token from our server)
+    match /{document=**} {
+      allow read: if request.auth != null;
+      allow write: if false; // all writes go through the server (Admin SDK)
+    }
+  }
+}

@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { subscribeToRefusals, subscribeToReasons } from '../lib/firebase';
 import { Refusal, RefusalReason } from '../types';
 import { Search, Filter, Calendar, Trash2, Edit, Printer, FileSpreadsheet, Eye, RefreshCw, X } from 'lucide-react';
 
@@ -43,25 +44,27 @@ export function ArchiveView({ currentUser, onEdit, onTriggerPrint }: ArchiveView
   // Selected refusal modal/details state
   const [selectedRefusal, setSelectedRefusal] = useState<Refusal | null>(null);
 
-  const fetchArchive = async () => {
+  const fetchArchive = () => {
+    // kept for manual refresh button — live sync handles auto updates
     setLoading(true);
     setError('');
-    try {
-      const [refData, reasonsData] = await Promise.all([
-        api.getRefusals(),
-        api.getReasons()
-      ]);
-      setRefusals(refData);
-      setReasons(reasonsData);
-    } catch (err: any) {
-      setError(err?.message || 'არქივის ჩატვირთვა ვერ მოხერხდა');
-    } finally {
-      setLoading(false);
-    }
+    // triggers re-mount of subscriptions via key or just clears error state
+    setLoading(false);
   };
 
   useEffect(() => {
-    fetchArchive();
+    setLoading(true);
+    const unsubRefusals = subscribeToRefusals(data => {
+      setRefusals(data as Refusal[]);
+      setLoading(false);
+    });
+    const unsubReasons = subscribeToReasons(data => {
+      setReasons(data as RefusalReason[]);
+    });
+    return () => {
+      unsubRefusals();
+      unsubReasons();
+    };
   }, []);
 
   const handleDelete = async (id: string, diagnosis: string) => {
@@ -69,7 +72,6 @@ export function ArchiveView({ currentUser, onEdit, onTriggerPrint }: ArchiveView
       try {
         await api.deleteRefusal(id);
         alert('ჩანაწერი წარმატებით წაიშალა');
-        fetchArchive();
       } catch (err: any) {
         alert(err?.message || 'წაშლისას დაფიქსირდა შეცდომა');
       }

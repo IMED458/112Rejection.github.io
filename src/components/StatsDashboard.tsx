@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { subscribeToRefusals } from '../lib/firebase';
 import { Refusal } from '../types';
 import { BarChart, TrendingUp, User, ClipboardList, Clock, Sparkles, Filter, Calendar, RefreshCw } from 'lucide-react';
 
@@ -24,25 +25,17 @@ export function StatsDashboard({ refusalsList }: StatsDashboardProps) {
   const [filterShift, setFilterShift] = useState('');
   const [filterReason, setFilterReason] = useState('');
 
-  const fetchStats = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await api.getRefusals();
-      setRefusals(data);
-    } catch (err: any) {
-      setError(err?.message || 'სტატისტიკის ჩატვირთვა ვერ მოხერხდა');
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     if (refusalsList) {
       setRefusals(refusalsList);
-    } else {
-      fetchStats();
+      return;
     }
+    setLoading(true);
+    const unsub = subscribeToRefusals(data => {
+      setRefusals(data as Refusal[]);
+      setLoading(false);
+    });
+    return () => unsub();
   }, [refusalsList]);
 
   // Extract filters items
@@ -128,7 +121,7 @@ export function StatsDashboard({ refusalsList }: StatsDashboardProps) {
           </p>
         </div>
         <button
-          onClick={fetchStats}
+          onClick={() => { /* live sync auto-updates */ }}
           className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-slate-600 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 border border-gray-200 rounded-md transition duration-150 cursor-pointer"
         >
           <RefreshCw size={14} className="text-blue-600" />

@@ -5,6 +5,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { api } from '../lib/api';
+import { subscribeToReasons } from '../lib/firebase';
 import { RefusalReason } from '../types';
 import { Settings, Plus, ToggleLeft, ToggleRight, Trash2, Edit, CheckCircle, RefreshCw } from 'lucide-react';
 
@@ -18,21 +19,15 @@ export function ReasonManagement() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState('');
 
-  const fetchReasons = async () => {
-    setLoading(true);
-    setError('');
-    try {
-      const data = await api.getReasons();
-      setReasons(data);
-    } catch (err: any) {
-      setError(err?.message || 'უარის მიზეზების ჩატვირთვა ვერ მოხერხდა');
-    } finally {
-      setLoading(false);
-    }
-  };
+  const fetchReasons = () => { /* live sync via onSnapshot */ };
 
   useEffect(() => {
-    fetchReasons();
+    setLoading(true);
+    const unsub = subscribeToReasons(data => {
+      setReasons(data as RefusalReason[]);
+      setLoading(false);
+    });
+    return () => unsub();
   }, []);
 
   const handleAdd = async (e: React.FormEvent) => {
@@ -43,7 +38,6 @@ export function ReasonManagement() {
     try {
       await api.createReason(newName.trim());
       setNewName('');
-      fetchReasons();
     } catch (err: any) {
       setError(err?.message || 'მიზეზის დამატება ვერ მოხერხდა');
     }
@@ -52,7 +46,6 @@ export function ReasonManagement() {
   const handleToggleActive = async (id: string, currentStatus: boolean) => {
     try {
       await api.updateReason(id, { isActive: !currentStatus });
-      fetchReasons();
     } catch (err: any) {
       alert(err?.message || 'სტატუსის შეცვლა ვერ მოხერხდა');
     }
@@ -68,7 +61,6 @@ export function ReasonManagement() {
     try {
       await api.updateReason(id, { name: editingName.trim() });
       setEditingId(null);
-      fetchReasons();
     } catch (err: any) {
       alert(err?.message || 'რედაქტირება ვერ მოხერხდა');
     }
@@ -78,7 +70,6 @@ export function ReasonManagement() {
     if (window.confirm(`ნამდვილად გსურთ უარის მიზეზის [ ${name} ] წაშლა საიტიდან?`)) {
       try {
         await api.deleteReason(id);
-        fetchReasons();
       } catch (err: any) {
         alert(err?.message || 'წაშლა ვერ მოხერხდა');
       }
