@@ -13,7 +13,7 @@ import {
   Unsubscribe,
   DocumentData,
 } from 'firebase/firestore';
-import { getAuth, signInWithCustomToken } from 'firebase/auth';
+import { getAuth } from 'firebase/auth';
 
 const firebaseConfig = {
   apiKey: "AIzaSyAsA-igD7jTJGWldYDU_gsMTzWBzKBICMM",
@@ -22,62 +22,42 @@ const firebaseConfig = {
   storageBucket: "rejection-f96c5.firebasestorage.app",
   messagingSenderId: "1070127116016",
   appId: "1:1070127116016:web:03030315e771a699041c35",
-  measurementId: "G-XE68F7WYFX"
+  measurementId: "G-XE68F7WYFX",
 };
 
 const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-export async function signInWithFirebaseToken(customToken: string): Promise<void> {
-  try {
-    await signInWithCustomToken(auth, customToken);
-  } catch (err) {
-    console.warn('Firebase custom token sign-in failed', err);
-  }
-}
+type Callback = (data: DocumentData[]) => void;
+type ErrCallback = (err: Error) => void;
 
-type ErrorCallback = (err: Error) => void;
-
-export function subscribeToRefusals(
-  callback: (data: DocumentData[]) => void,
-  onError?: ErrorCallback
-): Unsubscribe {
+export function subscribeToRefusals(cb: Callback, onErr?: ErrCallback): Unsubscribe {
   const q = query(collection(db, 'refusals'), orderBy('createdAt', 'desc'));
-  return onSnapshot(q, snapshot => {
-    callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-  }, err => {
-    console.error('Refusals subscription error:', err);
-    onError?.(err);
-  });
+  return onSnapshot(
+    q,
+    snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+    err => { console.error('refusals subscription:', err); onErr?.(err); }
+  );
 }
 
-export function subscribeToReasons(
-  callback: (data: DocumentData[]) => void,
-  onError?: ErrorCallback
-): Unsubscribe {
+export function subscribeToReasons(cb: Callback, onErr?: ErrCallback): Unsubscribe {
   const q = query(collection(db, 'refusalReasons'), orderBy('createdAt', 'asc'));
-  return onSnapshot(q, snapshot => {
-    callback(snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })));
-  }, err => {
-    console.error('Reasons subscription error:', err);
-    onError?.(err);
-  });
+  return onSnapshot(
+    q,
+    snap => cb(snap.docs.map(d => ({ id: d.id, ...d.data() }))),
+    err => { console.error('reasons subscription:', err); onErr?.(err); }
+  );
 }
 
-export function subscribeToUsers(
-  callback: (data: DocumentData[]) => void,
-  onError?: ErrorCallback
-): Unsubscribe {
+export function subscribeToUsers(cb: Callback, onErr?: ErrCallback): Unsubscribe {
   const q = query(collection(db, 'users'), orderBy('createdAt', 'asc'));
-  return onSnapshot(q, snapshot => {
-    const items = snapshot.docs.map(doc => {
-      const { passwordHash: _ph, ...safe } = doc.data() as any;
-      return { id: doc.id, ...safe };
-    });
-    callback(items);
-  }, err => {
-    console.error('Users subscription error:', err);
-    onError?.(err);
-  });
+  return onSnapshot(
+    q,
+    snap => cb(snap.docs.map(d => {
+      const { passwordHash: _p, usernameLower: _u, pendingPassword: _pp, ...safe } = d.data() as any;
+      return { id: d.id, ...safe };
+    })),
+    err => { console.error('users subscription:', err); onErr?.(err); }
+  );
 }

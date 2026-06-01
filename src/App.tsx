@@ -4,7 +4,9 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { api } from './lib/api';
+import { getDocs, collection } from 'firebase/firestore';
+import { api, onAuthStateChanged, auth } from './lib/api';
+import { db } from './lib/firebase';
 import { LoginScreen } from './components/LoginScreen';
 import { NewRefusalForm } from './components/NewRefusalForm';
 import { ArchiveView } from './components/ArchiveView';
@@ -13,6 +15,7 @@ import { StatsDashboard } from './components/StatsDashboard';
 import { UserManagement } from './components/UserManagement';
 import { ReasonManagement } from './components/ReasonManagement';
 import { ChangePasswordForm } from './components/ChangePasswordForm';
+import { SetupScreen } from './components/SetupScreen';
 
 import { 
   Shield, 
@@ -36,6 +39,7 @@ type ActivePage = 'new_refusal' | 'archive' | 'pdf_print' | 'change_password' | 
 export default function App() {
   const [currentUser, setCurrentUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [needsSetup, setNeedsSetup] = useState(false);
   const [currentPage, setCurrentPage] = useState<ActivePage>('new_refusal');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [editRefusal, setEditRefusal] = useState<Refusal | null>(null);
@@ -45,36 +49,29 @@ export default function App() {
   const [initialPrintDate, setInitialPrintDate] = useState('');
   const [initialPrintShift, setInitialPrintShift] = useState<ShiftType>('day');
 
-  // Load current session from localStorage Token
-  const checkSession = async () => {
-    setLoading(true);
-    const token = api.getToken();
-    if (!token) {
-      setCurrentUser(null);
-      setLoading(false);
-      return;
-    }
-
-    try {
-      const user = await api.getMe();
-      setCurrentUser(user);
-      // Route rules: Doctor defaults to form, Admin defaults to core dashboard stats
-      if (user.role === 'admin') {
-        setCurrentPage('stats');
-      } else {
-        setCurrentPage('new_refusal');
-      }
-    } catch (err) {
-      console.warn('Authentication token expired or corrupt');
-      api.clearToken();
-      setCurrentUser(null);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
-    checkSession();
+    const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
+      if (!firebaseUser) {
+        // Check if Firebase has any users at all (first-time setup)
+        const snap = await getDocs(collection(db, 'users'));
+        setNeedsSetup(snap.empty);
+        setCurrentUser(null);
+        setLoading(false);
+        return;
+      }
+      try {
+        const user = await api.getMe();
+        setCurrentUser(user);
+        setNeedsSetup(false);
+        setCurrentPage(user.role === 'admin' ? 'stats' : 'new_refusal');
+      } catch {
+        api.clearToken();
+        setCurrentUser(null);
+      } finally {
+        setLoading(false);
+      }
+    });
+    return () => unsub();
   }, []);
 
   const handleLoginSuccess = (user: any) => {
@@ -130,6 +127,9 @@ export default function App() {
   }
 
   if (!currentUser) {
+    if (needsSetup) {
+      return <SetupScreen onSetupComplete={() => setNeedsSetup(false)} />;
+    }
     return <LoginScreen onLoginSuccess={handleLoginSuccess} />;
   }
 

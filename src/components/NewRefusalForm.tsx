@@ -39,7 +39,7 @@ export function NewRefusalForm({ currentUser, editRefusal, onSuccess, onCancel }
     const fetchReasons = async () => {
       setLoadingReasons(true);
       try {
-        const loaded = await api.getReasons();
+        const loaded = await api.getReasons() as RefusalReason[];
         const activeOnly = loaded.filter((r: RefusalReason) => r.isActive);
         setReasons(activeOnly);
         if (activeOnly.length > 0 && !editRefusal) {
@@ -158,10 +158,10 @@ export function NewRefusalForm({ currentUser, editRefusal, onSuccess, onCancel }
     try {
       let result: Refusal;
       if (editRefusal) {
-        result = await api.updateRefusal(editRefusal.id, payload);
+        result = await api.updateRefusal(editRefusal.id, payload) as Refusal;
         setSuccessMsg('მონაცემები წარმატებით განახლდა.');
       } else {
-        result = await api.createRefusal(payload);
+        result = await api.createRefusal(payload) as Refusal;
         setSuccessMsg('ჩანაწერი წარმატებით დაემატა.');
         // clear inputs for next recording if they aren't printing immediately
         if (!andPrint) {
