@@ -94,16 +94,15 @@ export default function App() {
     }
   };
 
-  // After saving: go to archive by default; PDF only if user explicitly chose it
+  // After saving: stay on form; PDF only if user explicitly chose it
   const handleRefusalSuccess = (savedRefusal?: Refusal, shouldPrint?: boolean) => {
     if (shouldPrint && savedRefusal) {
       setInitialPrintDate(savedRefusal.refusalDate);
       setInitialPrintShift(savedRefusal.shiftType);
       api.getRefusals().then(data => setAllRefusalsForPrint(data));
       setCurrentPage('pdf_print');
-    } else {
-      setCurrentPage('archive');
     }
+    // else: stay on new_refusal page
   };
 
   // Triggers print option from the archive with filtered records pre-selected
