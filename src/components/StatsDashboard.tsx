@@ -31,10 +31,10 @@ export function StatsDashboard({ refusalsList }: StatsDashboardProps) {
       return;
     }
     setLoading(true);
-    const unsub = subscribeToRefusals(data => {
-      setRefusals(data as Refusal[]);
-      setLoading(false);
-    });
+    const unsub = subscribeToRefusals(
+      data => { setRefusals(data as Refusal[]); setLoading(false); },
+      () => { setLoading(false); setError('მონაცემების ჩატვირთვა ვერ მოხერხდა'); }
+    );
     return () => unsub();
   }, [refusalsList]);
 

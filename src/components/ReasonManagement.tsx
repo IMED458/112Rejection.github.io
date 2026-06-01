@@ -23,10 +23,10 @@ export function ReasonManagement() {
 
   useEffect(() => {
     setLoading(true);
-    const unsub = subscribeToReasons(data => {
-      setReasons(data as RefusalReason[]);
-      setLoading(false);
-    });
+    const unsub = subscribeToReasons(
+      data => { setReasons(data as RefusalReason[]); setLoading(false); },
+      () => { setLoading(false); setError('მიზეზების ჩატვირთვა ვერ მოხერხდა'); }
+    );
     return () => unsub();
   }, []);
 

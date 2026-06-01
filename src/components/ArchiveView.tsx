@@ -54,17 +54,14 @@ export function ArchiveView({ currentUser, onEdit, onTriggerPrint }: ArchiveView
 
   useEffect(() => {
     setLoading(true);
-    const unsubRefusals = subscribeToRefusals(data => {
-      setRefusals(data as Refusal[]);
-      setLoading(false);
-    });
-    const unsubReasons = subscribeToReasons(data => {
-      setReasons(data as RefusalReason[]);
-    });
-    return () => {
-      unsubRefusals();
-      unsubReasons();
-    };
+    const unsubRefusals = subscribeToRefusals(
+      data => { setRefusals(data as Refusal[]); setLoading(false); },
+      () => { setLoading(false); setError('მონაცემების ჩატვირთვა ვერ მოხერხდა'); }
+    );
+    const unsubReasons = subscribeToReasons(
+      data => setReasons(data as RefusalReason[])
+    );
+    return () => { unsubRefusals(); unsubReasons(); };
   }, []);
 
   const handleDelete = async (id: string, diagnosis: string) => {

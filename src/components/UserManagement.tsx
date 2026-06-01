@@ -35,10 +35,10 @@ export function UserManagement() {
 
   useEffect(() => {
     setLoading(true);
-    const unsub = subscribeToUsers(data => {
-      setUsers(data as User[]);
-      setLoading(false);
-    });
+    const unsub = subscribeToUsers(
+      data => { setUsers(data as User[]); setLoading(false); },
+      () => { setLoading(false); setError('მომხმარებლების ჩატვირთვა ვერ მოხერხდა'); }
+    );
     return () => unsub();
   }, []);
 
