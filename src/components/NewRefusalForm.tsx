@@ -11,7 +11,7 @@ import { Save, RefreshCw, Printer, ArrowLeft, AlertCircle, FileText } from 'luci
 interface NewRefusalFormProps {
   currentUser: any;
   editRefusal?: Refusal | null;
-  onSuccess: (savedRefusal?: Refusal) => void;
+  onSuccess: (savedRefusal?: Refusal, shouldPrint?: boolean) => void;
   onCancel?: () => void;
 }
 
@@ -163,19 +163,16 @@ export function NewRefusalForm({ currentUser, editRefusal, onSuccess, onCancel }
       } else {
         result = await api.createRefusal(payload) as Refusal;
         setSuccessMsg('ჩანაწერი წარმატებით დაემატა.');
-        // clear inputs for next recording if they aren't printing immediately
-        if (!andPrint) {
-          setPatientIdentifier('');
-          setDiagnosis('');
-          setRefusalReasonCustom('');
-          setComment('');
-          setHospitalizationOperator('');
-          setAmbulanceInfo('');
-        }
+        setPatientIdentifier('');
+        setDiagnosis('');
+        setRefusalReasonCustom('');
+        setComment('');
+        setHospitalizationOperator('');
+        setAmbulanceInfo('');
       }
 
       setTimeout(() => {
-        onSuccess(result);
+        onSuccess(result, andPrint);
       }, 800);
     } catch (err: any) {
       setError(err?.message || 'ჩანაწერის შენახვა ვერ მოხერხდა');
@@ -374,7 +371,7 @@ export function NewRefusalForm({ currentUser, editRefusal, onSuccess, onCancel }
                 className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-2.5 text-sm font-semibold text-blue-700 bg-blue-50 hover:bg-blue-100 border border-blue-200 rounded-md transition duration-150 disabled:opacity-55 cursor-pointer"
               >
             <Printer size={16} />
-            {submitting ? 'ინახება...' : 'შენახვა და ბეჭდვა'}
+            {submitting ? 'ინახება...' : 'შენახვა და PDF-ზე გადასვლა'}
           </button>
 
           <button

@@ -94,19 +94,16 @@ export default function App() {
     }
   };
 
-  // Callback after adding new refusal -> automatically open refusal archive
-  const handleRefusalSuccess = (savedRefusal?: Refusal) => {
-    api.getRefusals().then(data => {
-      setAllRefusalsForPrint(data);
-      if (savedRefusal) {
-        // Trigger print immediately on "Save and Print" option
-        setInitialPrintDate(savedRefusal.refusalDate);
-        setInitialPrintShift(savedRefusal.shiftType);
-        setCurrentPage('pdf_print');
-      } else {
-        setCurrentPage('archive');
-      }
-    });
+  // After saving: go to archive by default; PDF only if user explicitly chose it
+  const handleRefusalSuccess = (savedRefusal?: Refusal, shouldPrint?: boolean) => {
+    if (shouldPrint && savedRefusal) {
+      setInitialPrintDate(savedRefusal.refusalDate);
+      setInitialPrintShift(savedRefusal.shiftType);
+      api.getRefusals().then(data => setAllRefusalsForPrint(data));
+      setCurrentPage('pdf_print');
+    } else {
+      setCurrentPage('archive');
+    }
   };
 
   // Triggers print option from the archive with filtered records pre-selected
