@@ -4,6 +4,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import { subscribeToRefusals } from '../lib/firebase';
 import { Refusal, ShiftType } from '../types';
 import { Printer, Calendar, ArrowLeft, Grid, FileText } from 'lucide-react';
 
@@ -28,16 +29,23 @@ interface PdfPrintViewProps {
   defaultDate?: string;
   defaultShift?: ShiftType;
   onBack: () => void;
+  currentUser?: any;
 }
 
-export function PdfPrintView({ refusals, defaultDate, defaultShift, onBack }: PdfPrintViewProps) {
+export function PdfPrintView({ refusals: refusalsProp, defaultDate, defaultShift, onBack, currentUser }: PdfPrintViewProps) {
   const [printDate, setPrintDate] = useState('');
   const [printShift, setPrintShift] = useState<ShiftType>('day');
   const [printableRecords, setPrintableRecords] = useState<Refusal[]>([]);
+  const [allRefusals, setAllRefusals] = useState<Refusal[]>(refusalsProp || []);
+
+  // Live sync from Firestore
+  useEffect(() => {
+    const unsub = subscribeToRefusals(data => setAllRefusals(data as Refusal[]));
+    return () => unsub();
+  }, []);
 
   // Default parameters on load
   useEffect(() => {
-    // default to today's date
     const today = new Date().toISOString().split('T')[0];
     setPrintDate(defaultDate || today);
     setPrintShift(defaultShift || 'day');
@@ -54,7 +62,7 @@ export function PdfPrintView({ refusals, defaultDate, defaultShift, onBack }: Pd
     const startBoundary = `${printDate}T09:00`;
     const endBoundary = `${nextDate}T09:00`;
 
-    const records = refusals.filter(r => {
+    const records = allRefusals.filter(r => {
       const refuseDateTime = `${r.refusalDate}T${r.refusalTime}`;
       return refuseDateTime >= startBoundary && refuseDateTime < endBoundary;
     });
@@ -67,7 +75,7 @@ export function PdfPrintView({ refusals, defaultDate, defaultShift, onBack }: Pd
     });
 
     setPrintableRecords(sorted);
-  }, [refusals, printDate, printShift]);
+  }, [allRefusals, printDate, printShift]);
 
   const handlePrintTrigger = () => {
     window.print();
@@ -262,13 +270,13 @@ export function PdfPrintView({ refusals, defaultDate, defaultShift, onBack }: Pd
         {/* Signatures section - Formulated strictly at the base of A4 page */}
         <div className="pt-8 border-t border-slate-300 grid grid-cols-1 md:grid-cols-2 gap-8 text-xs text-slate-800">
           <div className="space-y-4">
-            <h3 className="font-bold underline text-slate-900">მორიგე ექიმის დასტური:</h3>
+            <h3 className="font-bold underline text-slate-900">მორიგე ექიმი:</h3>
             <div className="space-y-3 pt-1">
+              <div className="text-[11px] text-slate-700 font-semibold">
+                {currentUser ? `${currentUser.firstName} ${currentUser.lastName}` : '________________________________'}
+              </div>
               <div>
                 ხელმოწერა: ___________________________________________
-              </div>
-              <div className="text-[11px] text-slate-500 pt-1">
-                სახელი და გვარი: _____________________________________
               </div>
               <div className="text-[11px] text-slate-400 pt-1">
                 თარიღი: {printDate ? `${formatToGeorgianDate(printDate)}` : '____/____/________'}

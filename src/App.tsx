@@ -352,6 +352,7 @@ export default function App() {
                   refusals={allRefusalsForPrint}
                   defaultDate={initialPrintDate}
                   defaultShift={initialPrintShift}
+                  currentUser={currentUser}
                   onBack={() => {
                     setCurrentPage('archive');
                   }}
