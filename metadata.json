@@ -1,0 +1,6 @@
+{
+  "name": "112-ის უარების აღრიცხვა",
+  "description": "სისტემა 112-ის მიერ შეთანხმებულ პაციენტებზე ემერჯენსის ექიმების მიერ ნათქვამი უარების აღსარიცხად",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
