@@ -175,7 +175,7 @@ export function PdfPrintView({ refusals, defaultDate, defaultShift, onBack }: Pd
             112-თან შეთანხმებულ პაციენტებზე უარის აღრიცხვის ფორმა
           </h1>
           <p className="text-sm font-bold tracking-widest text-slate-500 uppercase">
-            საგანგებო და გადაუდებელი მედიცინის დეპარტამენტი
+            გადაუდებელი მედიცინის დეპარტამენტი
           </p>
         </div>
 
@@ -188,7 +188,7 @@ export function PdfPrintView({ refusals, defaultDate, defaultShift, onBack }: Pd
             </span>
           </div>
           <div className="space-y-1">
-            <span className="text-slate-400 block text-[10px]">მორიგეობის გრაფიკი:</span>
+            <span className="text-slate-400 block text-[10px]">მორიგეობის პერიოდი:</span>
             <span className="font-bold text-slate-800 text-sm">
               {formatToGeorgianDate(printDate)} 09:00 - {formatToGeorgianDate(getNextDateStr(printDate))} 09:00 (24 სთ)
             </span>
