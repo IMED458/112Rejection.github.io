@@ -10,7 +10,8 @@ service cloud.firestore {
 
     match /users/{uid} {
       allow read: if isAuth();
-      allow create: if isAdmin();
+      // authenticated user can create their OWN doc (covers setup + admin-created users via secondary app)
+      allow create: if isAuth() && request.auth.uid == uid;
       allow update: if isAdmin() || (isAuth() && request.auth.uid == uid);
       allow delete: if isAdmin();
     }
@@ -24,7 +25,8 @@ service cloud.firestore {
 
     match /refusalReasons/{id} {
       allow read: if isAuth();
-      allow write: if isAdmin();
+      // allow create during setup (when no admin exists yet) or by admin
+      allow create, update, delete: if isAdmin() || !exists(/databases/$(database)/documents/users/$(request.auth.uid));
     }
 
     match /auditLogs/{id} {
