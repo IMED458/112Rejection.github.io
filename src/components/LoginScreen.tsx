@@ -120,28 +120,6 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
             </div>
           </form>
 
-          {/* Seed accounts presentation helper for testing */}
-          <div className="mt-8 border-t border-gray-200 pt-6">
-            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">
-              სატესტო ანგარიშები
-            </h4>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => autofillUser('doctor', 'Doctor12345')}
-                className="flex flex-col text-left p-2.5 bg-slate-50 hover:bg-blue-50/50 border border-gray-200 hover:border-blue-200 rounded-lg transition duration-150 cursor-pointer"
-              >
-                <span className="text-xs font-bold text-slate-700">მორიგე ექიმი</span>
-                <span className="text-[10px] text-slate-400">doctor / Doctor12345</span>
-              </button>
-              <button
-                onClick={() => autofillUser('admin', 'Admin12345')}
-                className="flex flex-col text-left p-2.5 bg-slate-50 hover:bg-blue-50/50 border border-gray-200 hover:border-blue-200 rounded-lg transition duration-150 cursor-pointer"
-              >
-                <span className="text-xs font-bold text-slate-700">ადმინისტრატორი</span>
-                <span className="text-[10px] text-slate-400">admin / Admin12345</span>
-              </button>
-            </div>
-          </div>
         </div>
       </div>
     </div>
