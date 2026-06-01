@@ -54,10 +54,12 @@ export function subscribeToUsers(cb: Callback, onErr?: ErrCallback): Unsubscribe
   const q = query(collection(db, 'users'), orderBy('createdAt', 'asc'));
   return onSnapshot(
     q,
-    snap => cb(snap.docs.map(d => {
-      const { passwordHash: _p, usernameLower: _u, pendingPassword: _pp, ...safe } = d.data() as any;
-      return { id: d.id, ...safe };
-    })),
+    snap => cb(snap.docs
+      .filter(d => !(d.data() as any).hidden)
+      .map(d => {
+        const { passwordHash: _p, usernameLower: _u, pendingPassword: _pp, ...safe } = d.data() as any;
+        return { id: d.id, ...safe };
+      })),
     err => { console.error('users subscription:', err); onErr?.(err); }
   );
 }
