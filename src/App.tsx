@@ -52,9 +52,12 @@ export default function App() {
   useEffect(() => {
     const unsub = onAuthStateChanged(auth, async (firebaseUser) => {
       if (!firebaseUser) {
-        // Check if Firebase has any users at all (first-time setup)
-        const snap = await getDocs(collection(db, 'users'));
-        setNeedsSetup(snap.empty);
+        try {
+          const snap = await getDocs(collection(db, 'users'));
+          setNeedsSetup(snap.empty);
+        } catch {
+          setNeedsSetup(false);
+        }
         setCurrentUser(null);
         setLoading(false);
         return;
