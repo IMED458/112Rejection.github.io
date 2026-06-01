@@ -83,7 +83,7 @@ export function LoginScreen({ onLoginSuccess }: LoginScreenProps) {
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2.5 bg-white border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm"
-                  placeholder="admin ან doctor"
+                  placeholder="მომხმარებლის სახელი"
                 />
               </div>
             </div>
