@@ -277,16 +277,10 @@ export function PdfPrintView({ refusals, defaultDate, defaultShift, onBack }: Pd
           </div>
 
           <div className="space-y-4">
-            <h3 className="font-bold underline text-slate-900">დეპარტამენტის პასუხისმგებელი პირი:</h3>
+            <h3 className="font-bold underline text-slate-900">დეპარტამენტის ხელმძღვანელი: ანა დალაქიშვილი</h3>
             <div className="space-y-3 pt-1">
               <div>
                 ხელმოწერა: ___________________________________________
-              </div>
-              <div className="text-[11px] text-slate-500 pt-1">
-                თანამდებობა: კლინიკური დირექტორი / უფროსი ექიმი
-              </div>
-              <div className="text-[11px] text-slate-400 pt-1">
-                სტატუსი: _____________________________________________
               </div>
             </div>
           </div>
