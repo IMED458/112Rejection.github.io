@@ -13,7 +13,7 @@ const formatToGeorgianDate = (yyyyMmDd: string): string => {
   if (!yyyyMmDd) return '';
   const parts = yyyyMmDd.split('-');
   if (parts.length === 3) {
-    return `${parts[2]}.${parts[1]}.${parts[0]}`;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
   }
   return yyyyMmDd;
 };

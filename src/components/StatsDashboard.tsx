@@ -373,7 +373,7 @@ export function StatsDashboard({ refusalsList }: StatsDashboardProps) {
                     {chronology.map((col) => {
                       // format date string "2026-06-01" -> "01.06"
                       const parts = col.date.split('-');
-                      const displayDate = parts.length === 3 ? `${parts[2]}.${parts[1]}` : col.date;
+                      const displayDate = parts.length === 3 ? `${parts[2]}/${parts[1]}` : col.date;
                       return (
                         <div key={col.date} className="w-full text-center truncate">
                           {displayDate}
