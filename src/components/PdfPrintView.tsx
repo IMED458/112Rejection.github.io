@@ -44,11 +44,25 @@ export function PdfPrintView({ refusals: refusalsProp, defaultDate, defaultShift
     return () => unsub();
   }, []);
 
-  // Default parameters on load
+  // Default parameters on load — shift starts at 09:00, so before 09:00 still "yesterday's" shift
   useEffect(() => {
-    const today = new Date().toISOString().split('T')[0];
-    setPrintDate(defaultDate || today);
-    setPrintShift(defaultShift || 'day');
+    if (defaultDate) {
+      setPrintDate(defaultDate);
+      setPrintShift(defaultShift || 'day');
+      return;
+    }
+    const now = new Date();
+    const shiftStart = new Date(now);
+    shiftStart.setHours(9, 0, 0, 0);
+    // If current time is before 09:00, the active shift started yesterday
+    if (now < shiftStart) {
+      shiftStart.setDate(shiftStart.getDate() - 1);
+    }
+    const yyyy = shiftStart.getFullYear();
+    const mm = String(shiftStart.getMonth() + 1).padStart(2, '0');
+    const dd = String(shiftStart.getDate()).padStart(2, '0');
+    setPrintDate(`${yyyy}-${mm}-${dd}`);
+    setPrintShift('day');
   }, [defaultDate, defaultShift]);
 
   // Compute print records matching 24-hour shift starting at 09:00
